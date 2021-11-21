@@ -1,151 +1,130 @@
-import './style.css'
-
+import './style.css';
 import * as THREE from 'three';
-
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-const canva = document.getElementById("bg");
+
+// Setup
+
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight , 0.1,2000);
-const loader = new GLTFLoader();
-let today = new Date();
-let time = today.getHours();
-console.log(time);
-(function(){
-  var script=document.createElement('script');
-  script.onload=function(){
-    var stats=new Stats();
-    document.body.appendChild(stats.dom);
-    requestAnimationFrame(function loop(){
-      stats.update();requestAnimationFrame(loop)}
-      );
-    };script.src='//mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
 
-
- 
-    
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 const renderer = new THREE.WebGLRenderer({
-  canvas: document.querySelector('#bg'), antialias: true ,alpha: true
+  canvas: document.querySelector('#bg'),
 });
 
-renderer.setSize(1500, 500 );
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.setClearColor( 0x000000, 0 );
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+camera.position.setZ(30);
+camera.position.setX(-3);
 
-camera.position.set(-29.997763933060007,13.779771949207634,51.11116445990841 );
+renderer.render(scene, camera);
 
+// Torus
 
-const object = []  ;
-loader.load( 'SAPINS.glb', function ( gltf ) {
-  gltf.scene.scale.set(6,6,6)
-  gltf.scene.translateX(-150)
-  gltf.scene.translateZ(-16)
-  object.push(gltf.scene) ;
-  let modell =  gltf.scene;
- 
-  
-	scene.add( modell );
+const geometry = new THREE.TorusGeometry(10, 3, 16, 100);
+const material = new THREE.MeshStandardMaterial({ color: 0xff6347 });
+const torus = new THREE.Mesh(geometry, material);
 
+scene.add(torus);
 
+// Lights
 
+const pointLight = new THREE.PointLight(0xffffff);
+pointLight.position.set(5, 5, 5);
 
-}, undefined, function ( error ) {
+const ambientLight = new THREE.AmbientLight(0xffffff);
+scene.add(pointLight, ambientLight);
 
-	console.error( error );
+// Helpers
 
-} );
+// const lightHelper = new THREE.PointLightHelper(pointLight)
+// const gridHelper = new THREE.GridHelper(200, 50);
+// scene.add(lightHelper, gridHelper)
 
-const snows=[];
-function addSnow(){
-  const geometry = new THREE.SphereGeometry(0.10,10,10);
-  const material = new THREE.MeshStandardMaterial({ color:0xffffff })
-  const snow = new THREE.Mesh( geometry, material);
+// const controls = new OrbitControls(camera, renderer.domElement);
+
+function addStar() {
+  const geometry = new THREE.SphereGeometry(0.25, 24, 24);
+  const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+  const star = new THREE.Mesh(geometry, material);
+
   const [x, y, z] = Array(3)
-  .fill()
-  .map(() => THREE.MathUtils.randFloatSpread(130));
+    .fill()
+    .map(() => THREE.MathUtils.randFloatSpread(100));
 
-snow.position.set(x, y, z);
-snows.push(snow)
-scene.add(snow);
+  star.position.set(x, y, z);
+  scene.add(star);
 }
 
+Array(200).fill().forEach(addStar);
 
-console.log(object)
-if(time > 6 &&  time < 9 ){
-  canva.classList.remove("day");
-canva.classList.add("rise-set");
-const pointLight = new THREE.PointLight(0xff2d2d)
-pointLight.position.set(120,45,53)
-pointLight.intensity = 1;
-const ambientLight = new THREE.AmbientLight(0xff5d5d);
-scene.add(pointLight, ambientLight)
-Array(2000).fill().forEach(addSnow);
-}
-if(time >= 9 && time < 17)
-{
-  canva.classList.remove("rise-set");
-  canva.classList.add("day");
-
-  const pointLight = new THREE.PointLight(0xfffbcf)
-  pointLight.position.set(120,45,53)
-  pointLight.intensity = 1;
-  const ambientLight = new THREE.AmbientLight(0xfffbcf);
-  scene.add(pointLight, ambientLight)
-  
-
-  }
-if (time >= 17 && time < 18)
-{
-canva.classList.remove("day");
-canva.classList.add("rise-set");
-const pointLight = new THREE.PointLight(0xff2d2d)
-pointLight.position.set(120,45,53)
-pointLight.intensity = 1;
-const ambientLight = new THREE.AmbientLight(0xff5d5d);
-scene.add(pointLight, ambientLight)
-Array(2000).fill().forEach(addSnow);
-}
-if(time >= 18){
-  canva.classList.remove("rise-set");
-  canva.classList.add("night");
-  const pointLight = new THREE.PointLight(0xbec2ff)
-  pointLight.position.set(120,45,53)
-  pointLight.intensity = -2;
-  const ambientLight = new THREE.AmbientLight(0xbec2ff);
-  scene.add(pointLight, ambientLight)
-  Array(2000).fill().forEach(addSnow);
-}
-if(time >= 0 && time < 9){
-  
-}
-//const gridHelper = new THREE.GridHelper(200,50);
-//scene.add(gridHelper)
-
-const controls = new OrbitControls(camera,renderer.domElement);
-
-controls.autoRotate = true;
-
-
-
-
-
+// Background
 
 const spaceTexture = new THREE.TextureLoader().load('space.jpg');
+scene.background = spaceTexture;
 
+// Avatar
 
+const jeffTexture = new THREE.TextureLoader().load('jeff.png');
+
+const jeff = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 3), new THREE.MeshBasicMaterial({ map: jeffTexture }));
+
+scene.add(jeff);
+
+// Moon
+
+const moonTexture = new THREE.TextureLoader().load('moon.jpg');
+const normalTexture = new THREE.TextureLoader().load('normal.jpg');
+
+const moon = new THREE.Mesh(
+  new THREE.SphereGeometry(3, 32, 32),
+  new THREE.MeshStandardMaterial({
+    map: moonTexture,
+    normalMap: normalTexture,
+  })
+);
+
+scene.add(moon);
+
+moon.position.z = 30;
+moon.position.setX(-10);
+
+jeff.position.z = -5;
+jeff.position.x = 2;
+
+// Scroll Animation
+
+function moveCamera() {
+  const t = document.body.getBoundingClientRect().top;
+  moon.rotation.x += 0.05;
+  moon.rotation.y += 0.075;
+  moon.rotation.z += 0.05;
+
+  jeff.rotation.y += 0.01;
+  jeff.rotation.z += 0.01;
+
+  camera.position.z = t * -0.01;
+  camera.position.x = t * -0.0002;
+  camera.rotation.y = t * -0.0002;
+}
+
+document.body.onscroll = moveCamera;
+moveCamera();
+
+// Animation Loop
 
 function animate() {
   requestAnimationFrame(animate);
-  snows.forEach(snow => (snow.position.y > -50) ? snow.position.y -=0.2   : snow.position.y = Math.random() * 100
-    );
-   
-   // console.log(camera.position);
-    camera.rotateOnAxis( 5 );
-  
-  controls.update();
 
-  renderer.render(scene,camera);
+  torus.rotation.x += 0.01;
+  torus.rotation.y += 0.005;
+  torus.rotation.z += 0.01;
+
+  moon.rotation.x += 0.005;
+
+  // controls.update();
+
+  renderer.render(scene, camera);
 }
-animate()
 
+animate();

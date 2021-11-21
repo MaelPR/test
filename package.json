@@ -1,5 +1,5 @@
 {
-  "name": "three-js-test",
+  "name": "three-demo",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
@@ -7,9 +7,9 @@
     "serve": "vite preview"
   },
   "devDependencies": {
-    "vite": "^2.6.4"
+    "vite": "^2.3.0"
   },
   "dependencies": {
-    "three": "^0.133.1"
+    "three": "^0.128.0"
   }
 }
